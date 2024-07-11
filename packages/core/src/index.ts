@@ -122,23 +122,15 @@ export async function createModuleCode(
   const html = insertHtml
     .replace(new RegExp(xmlns, 'g'), '')
     .replace(new RegExp(xmlnsLink, 'g'), '')
+  const svgHtml = `<svg xmlns="${XMLNS}" xmlns:link="${XMLNS_LINK}" id="${options.customDomId}" style="position: absolute; width: 0px; height: 0px;">${html}</svg>`
 
   const code = `
        if (typeof window !== 'undefined') {
          function loadSvg() {
            var body = document.body;
            var svgDom = document.getElementById('${options.customDomId}');
-           if(!svgDom) {
-             svgDom = document.createElementNS('${XMLNS}', 'svg');
-             svgDom.style.position = 'absolute';
-             svgDom.style.width = '0';
-             svgDom.style.height = '0';
-             svgDom.id = '${options.customDomId}';
-             svgDom.setAttribute('xmlns','${XMLNS}');
-             svgDom.setAttribute('xmlns:link','${XMLNS_LINK}');
-             svgDom.setAttribute('aria-hidden',true);
-           }
-           svgDom.innerHTML = ${JSON.stringify(html)};
+           if(svgDom) svgDom.remove()
+           svgDom = new DOMParser().parseFromString('${svgHtml}', 'image/svg+xml').documentElement
            ${domInject(options.inject)}
          }
          if(document.readyState === 'loading') {
